@@ -82,11 +82,15 @@ class Utils
         assert($dom instanceof DOMDocument);
         assert(is_string($xml));
 
-        $oldEntityLoader = libxml_disable_entity_loader(true);
+        if (\LIBXML_VERSION < 20900) {
+            $oldEntityLoader = libxml_disable_entity_loader(true);
+        }
 
         $res = $dom->loadXML($xml);
 
-        libxml_disable_entity_loader($oldEntityLoader);
+        if (\LIBXML_VERSION < 20900) {
+            libxml_disable_entity_loader($oldEntityLoader);
+        }
 
         foreach ($dom->childNodes as $child) {
             if ($child->nodeType === XML_DOCUMENT_TYPE_NODE) {
@@ -141,9 +145,15 @@ class Utils
             $schemaFile = __DIR__ . '/schemas/' . $schema;
         }
 
-        $oldEntityLoader = libxml_disable_entity_loader(false);
+        if (\LIBXML_VERSION < 20900) {
+            $oldEntityLoader = libxml_disable_entity_loader(false);
+        }  
         $res = $dom->schemaValidate($schemaFile);
-        libxml_disable_entity_loader($oldEntityLoader);
+
+        if (\LIBXML_VERSION < 20900) {
+            libxml_disable_entity_loader($oldEntityLoader);
+        }
+        
         if (!$res) {
             $xmlErrors = libxml_get_errors();
             syslog(LOG_INFO, 'Error validating the metadata: '.var_export($xmlErrors, true));
